@@ -50,13 +50,13 @@ GLITCH_RUNNER is a unique platformer game where you don't just control a charact
 ## 🎯 How to Play
 
 ### Basic Controls
-- **WASD / Arrow Keys** - Move and jump
+- **Arrow / SPACE Keys** - Move and jump
 - **Mouse Click** - Select and hack objects
 - **Inspector Panel** - Modify selected object properties
 
 ### Game Mechanics
 
-1. **Movement**: Use WASD or arrow keys to move your cyan player character
+1. **Movement**: Use arrow keys to move your cyan player character
 2. **Object Selection**: Click on any game object to select it
 3. **Property Hacking**: Use the inspector panel to modify object properties:
    - **isVisible**: Make objects invisible
