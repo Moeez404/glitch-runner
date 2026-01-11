@@ -407,7 +407,7 @@ export const Inspector: React.FC<InspectorProps> = ({
       </div>
 
       <div className="mt-auto pt-4 text-[10px] text-slate-600 text-center font-mono">
-        GLITCH_OS v1.3.3 [ROOT]
+        GLITCH_OS v1.3.5 [ROOT]
       </div>
     </div>
   );

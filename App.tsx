@@ -230,6 +230,7 @@ const App: React.FC = () => {
   const lastTimeRef = useRef<number>(0);
   const targetXRef = useRef<number | null>(null);
   const lastStepTimeRef = useRef<number>(0);
+  const canJumpRef = useRef<boolean>(true);
 
   // Try to initialize audio on mount
   useEffect(() => {
@@ -348,7 +349,13 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => { keysRef.current[e.code] = true; };
-    const handleKeyUp = (e: KeyboardEvent) => { keysRef.current[e.code] = false; };
+    const handleKeyUp = (e: KeyboardEvent) => { 
+        keysRef.current[e.code] = false; 
+        // Allow jumping again when jump key is released
+        if (e.code === 'ArrowUp' || e.code === 'Space') {
+            canJumpRef.current = true;
+        }
+    };
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     return () => {
@@ -479,43 +486,40 @@ const App: React.FC = () => {
 
         // Player Control & SFX
         if (ent.type === EntityType.PLAYER) {
-            const MOVE_ACCEL = 300;
-            const MAX_WALK_SPEED = 200;
+            const MOVE_ACCEL = 1000;
+            const MAX_WALK_SPEED = 750;
             const keys = keysRef.current;
             let manualInput = false;
 
-            if (keys['ArrowRight'] || keys['KeyD']) {
+            if (keys['ArrowRight']) {
                 ent.velocity.x += MOVE_ACCEL * deltaTime;
                 manualInput = true;
             }
-            if (keys['ArrowLeft'] || keys['KeyA']) {
+            if (keys['ArrowLeft']) {
                 ent.velocity.x -= MOVE_ACCEL * deltaTime;
                 manualInput = true;
             }
 
+            // Clamp maximum speed
+            if (ent.velocity.x > MAX_WALK_SPEED) ent.velocity.x = MAX_WALK_SPEED;
+            if (ent.velocity.x < -MAX_WALK_SPEED) ent.velocity.x = -MAX_WALK_SPEED;
+
             if (manualInput) {
                 targetXRef.current = null;
+                // Apply friction during movement
                 ent.velocity.x *= phys.friction;
                 if (Math.abs(ent.velocity.x) > 10 && time - lastStepTimeRef.current > 300 && Math.abs(ent.velocity.y) < 5) {
                     audio.sfxStep();
                     lastStepTimeRef.current = time;
                 }
-            } else if (targetXRef.current !== null) {
-                const targetX = targetXRef.current;
-                const center = ent.pos.x + ent.size.x / 2;
-                const diff = targetX - center;
-                if (Math.abs(diff) < 5) {
-                    targetXRef.current = null;
+            } else {
+                // Strong deceleration when no input - stop quickly
+                if (Math.abs(ent.velocity.x) < 50) {
                     ent.velocity.x = 0;
                 } else {
-                    ent.velocity.x = Math.sign(diff) * MAX_WALK_SPEED;
-                    if (time - lastStepTimeRef.current > 300 && Math.abs(ent.velocity.y) < 5) {
-                        audio.sfxStep();
-                        lastStepTimeRef.current = time;
-                    }
+                    ent.velocity.x *= 0.3; // Much stronger deceleration
                 }
-            } else {
-                ent.velocity.x *= phys.friction;
+                targetXRef.current = null;
             }
         }
 
@@ -606,9 +610,10 @@ const App: React.FC = () => {
 
         if (ent.type === EntityType.PLAYER && grounded) {
              const keys = keysRef.current;
-             if (keys['ArrowUp'] || keys['KeyW'] || keys['Space']) {
+             if ((keys['ArrowUp'] || keys['Space']) && canJumpRef.current) {
                   audio.sfxJump();
-                  ent.velocity.y = -600;
+                  ent.velocity.y = -400;
+                  canJumpRef.current = false;
              }
         }
 
@@ -930,7 +935,7 @@ const App: React.FC = () => {
                    </button>
                </div>
                <div className="text-xs text-slate-600 mt-8 font-mono">
-                   v1.3.3 // SYSTEM_READY
+                   v1.3.5 // SYSTEM_READY
                </div>
            </div>
        )}
@@ -1111,7 +1116,7 @@ const App: React.FC = () => {
             <div className="mt-4 text-[10px] text-slate-600 font-mono">
                 {gameState === 'EDITOR' && !isEditorTesting 
                     ? "DRAG FROM LEFT • DRAG ON CANVAS • CLICK TO EDIT PROPERTIES" 
-                    : "USE [W,A,S,D] OR ARROWS TO MOVE • CLICK OBJECTS TO HACK"
+                    : "USE ARROWS TO MOVE & SPACE TO JUMP • CLICK OBJECTS TO HACK"
                 }
             </div>
          </>

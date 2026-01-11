@@ -30,7 +30,7 @@ GLITCH_RUNNER is a unique platformer game where you don't just control a charact
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Moeez404/glitch-runner.git
    cd glitch-runner
    ```
 
