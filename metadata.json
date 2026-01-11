@@ -1,0 +1,5 @@
+{
+  "name": "GLITCH_RUNNER",
+  "description": "A meta-hacking puzzle platformer where you modify the game's source code properties in real-time to overcome obstacles. Rewrite reality to progress.",
+  "requestFramePermissions": []
+}
